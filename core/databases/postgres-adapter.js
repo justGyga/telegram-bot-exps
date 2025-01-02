@@ -30,9 +30,9 @@ export default class DatabaseAdapter extends BaseModule {
     async beforeHandler(_) {
         try {
             await this.#isConnect();
-            console.log("Connection to database is established");
+            console.log("[Postgres] Connection to database is established");
         } catch (ex) {
-            console.error("DataBase host is unreachable");
+            console.error("[Postgres] DataBase host is unreachable");
             console.log(ex.message);
             process.exit(1);
         }
@@ -46,6 +46,6 @@ export default class DatabaseAdapter extends BaseModule {
 
     async afterHandler(_) {
         await this.#initModels();
-        console.log("Models loaded");
+        console.log("[Postgres] Models loaded");
     }
 }
