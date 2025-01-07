@@ -1,9 +1,9 @@
-import { BaseModule } from "./server.js";
+import { BaseModule } from "./app.js";
 
 // eslint-disable-next-line import/no-mutable-exports
 export let telegramConnection = () => null;
 
-export default class TelegramBot extends BaseModule {
+export class TelegramBot extends BaseModule {
     #bot;
 
     /**

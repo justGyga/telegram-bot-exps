@@ -1,1 +1,1 @@
-export const BOT_COMMANDS = { START: "start" };
+export const BOT_COMMANDS = { START: "start", ADD_SCHEDULE: "delayed_message" };

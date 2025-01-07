@@ -1,7 +1,7 @@
 import { CronJob } from "cron";
-import { BaseModule } from "./server.js";
+import { BaseModule } from "./app.js";
 
-export default class Scheduler extends BaseModule {
+export class Scheduler extends BaseModule {
     #jobs;
     constructor(jobs) {
         super();

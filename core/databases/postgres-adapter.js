@@ -1,10 +1,10 @@
-import { BaseModule } from "../server.js";
+import { BaseModule } from "../app.js";
 
 export let transaction = null;
 export let query = () => null;
 export let getConnection = () => null;
 
-export default class DatabaseAdapter extends BaseModule {
+export class DatabaseAdapter extends BaseModule {
     constructor(connection) {
         super();
         this.connection = connection;
