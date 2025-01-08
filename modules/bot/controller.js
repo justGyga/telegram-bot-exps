@@ -1,12 +1,20 @@
-import { GrammyError, HttpError } from "grammy";
+import { Service } from "./service";
 
 export const DEFAULT_SESSION = {
     awaitingMedia: false,
     awaitingDate: false
 };
 
+function isDateValid(dateString) {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+}
+
 class Controller {
-    constructor() {}
+    #service;
+    constructor() {
+        this.#service = new Service();
+    }
     /**
      *
      * @param {import('grammy').Context} ctx
@@ -40,21 +48,34 @@ class Controller {
         console.log(Object.keys(ctx));
         console.log("---------MSG-----------");
         console.log(ctx.message);
-        ctx.reply(ctx);
+        ctx.reply("Привет! Пожалуйста, укажите дату и время, когда вы хотите записаться.");
     }
 
-    /**
-     *
-     * @param {GrammyError|HttpError|Error} exception
-     */
-    catchError(exception) {
-        const context = exception.ctx;
-        console.info(`[Telegram] Error while handling ${context.update.update_id}`);
-        if (exception.error instanceof GrammyError) {
-            console.error(`[Telegram] Error in request: ${exception.error.description}`);
-        } else if (exception.error instanceof HttpError) {
-            console.error(`[Telegram] Could not contact Telegram: ${exception.error}`);
-        } else console.error(`Unknown error: ${exception.error}`);
+    async messageTextHandler(ctx) {
+        console.log("-----CONFIG-------------");
+        console.log(ctx.session);
+        const messageText = ctx.message.text;
+
+        // Проверка на то, что пользователь ввел дату и время (функция может быть улучшена)
+        if (isDateValid(messageText)) {
+            await ctx.reply("Спасибо! Теперь, пожалуйста, отправьте любые медиафайлы, которые хотите прикрепить.");
+            // Можно сохранить состояние, чтобы ожидать медиафайлы
+            ctx.session.awaitingMedia = true;
+        } else {
+            await ctx.reply("Пожалуйста, введите корректную дату и время.");
+        }
+    }
+
+    async messageHandler(ctx) {
+        if (ctx.session.awaitingMedia) {
+            if (ctx.message.photo) {
+                await ctx.reply("Спасибо за медиафайл (фото). Ваш файл был получен!");
+                ctx.session.awaitingMedia = false; // Сбрасываем ожидание
+            } else if (ctx.message.video) {
+                await ctx.reply("Спасибо за медиафайл (видео). Ваш файл был получен!");
+                ctx.session.awaitingMedia = false; // Сбрасываем ожидание
+            } else await ctx.reply("Пожалуйста, отправьте только медиафайлы (фото или видео).");
+        }
     }
 }
 
