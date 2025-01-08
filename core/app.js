@@ -1,3 +1,5 @@
+import { Bot } from "grammy";
+
 export class BaseModule {
     async beforeHandler(app) {}
     async handler(app) {}
@@ -14,21 +16,27 @@ export class App {
     /**@type {Array<BaseModule>} */
     #services;
 
-    constructor(services) {
+    constructor(apiToken, services) {
         this.#services = services;
+        this.bot = new Bot(apiToken);
     }
 
     async initServices() {
         if (!this.#services.length) process.exit(1);
         for (const service of this.#services) {
-            await service._resolve(this.app);
+            await service._resolve(this.bot);
         }
         console.log("[App] Services loaded");
         return Promise.resolve(this);
     }
 
     run(callback = undefined) {
-        if (callback) callback();
-        console.log("[App] run successfully");
+        try {
+            if (callback) callback();
+            this.bot.start();
+            console.log("[App] run successfully");
+        } catch (error) {
+            console.log(error);
+        }
     }
 }

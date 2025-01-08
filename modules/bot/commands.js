@@ -1,1 +1,4 @@
-export const BOT_COMMANDS = { START: "start", ADD_SCHEDULE: "delayed_message" };
+export const BOT_COMMANDS = [
+    { command: "start", description: "Attach your account to tg" },
+    { command: "delayed_message", description: "Send message in group after delay" }
+];

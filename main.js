@@ -2,11 +2,14 @@ import { Sequelize } from "sequelize";
 import { App } from "./core/app.js";
 import { Scheduler } from "./core/cron.js";
 import { DatabaseAdapter } from "./core/databases/postgres-adapter.js";
-import { TelegramBot } from "./core/telegram.js";
+import { BotRouting } from "./core/telegram.js";
 import { userPlotter } from "./modules/_models/user.js";
-import botObject from "./modules/bot/router.js";
+import { BOT_COMMANDS } from "./modules/bot/commands.js";
+import composer from "./modules/bot/router.js";
 
-new App([
+const ApiToken = process.env.TG_API_TOKEN;
+
+new App(ApiToken, [
     new DatabaseAdapter(
         new Sequelize(process.env.DB_NAME, process.env.PG_USER, process.env.PG_PASS, {
             dialect: "postgres",
@@ -18,7 +21,7 @@ new App([
         })
     ).registerModels([userPlotter]),
     new Scheduler([]),
-    new TelegramBot(botObject)
+    new BotRouting([composer], BOT_COMMANDS)
 ])
     .initServices()
     .then((server) => server.run());
