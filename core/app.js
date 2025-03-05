@@ -1,3 +1,6 @@
+/* eslint-disable no-empty-function */
+/* eslint-disable no-unused-vars */
+// eslint-disable-next-line max-classes-per-file
 import { Bot } from "grammy";
 
 export class BaseModule {
@@ -13,7 +16,7 @@ export class BaseModule {
 }
 
 export class App {
-    /**@type {Array<BaseModule>} */
+    /** @type {Array<BaseModule>} */
     #services;
 
     constructor(apiToken, services) {

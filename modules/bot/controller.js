@@ -1,4 +1,6 @@
-import { Service } from "./service";
+import { InlineKeyboard } from "grammy";
+import { Group } from "../_models/group.js";
+import { Service } from "./service.js";
 
 export const DEFAULT_SESSION = {
     awaitingMedia: false,
@@ -7,7 +9,7 @@ export const DEFAULT_SESSION = {
 
 function isDateValid(dateString) {
     const date = new Date(dateString);
-    return !isNaN(date.getTime());
+    return !Number.isNaN(date.getTime());
 }
 
 class Controller {
@@ -15,10 +17,8 @@ class Controller {
     constructor() {
         this.#service = new Service();
     }
-    /**
-     *
-     * @param {import('grammy').Context} ctx
-     */
+
+    /** @param {import('grammy').Context} ctx */
     async start(ctx) {
         console.log("-----------------------");
         console.log(ctx);
@@ -40,7 +40,57 @@ class Controller {
     /**
      *
      * @param {import('grammy').Context} ctx
+     * @param {import('grammy').NextFunction} next
      */
+    async checkAccess(ctx, next) {
+        await next();
+    }
+
+    /**
+     *
+     * @param {import('grammy').Context} ctx
+     * @param {import('grammy').NextFunction} next
+     */
+    async isPrivate(ctx, next) {
+        if (ctx.message.chat.type != "group") return ctx.reply("No permissions");
+        await next();
+    }
+
+    /**
+     *
+     * @param {import('grammy').Context} ctx
+     * @param {import('grammy').NextFunction} next
+     */
+    async isGroup(ctx, next) {
+        if (ctx.message.chat.type != "group") return ctx.reply("No permissions");
+        await next();
+    }
+
+    /** @param {import('grammy').Context} ctx */
+    async regGroup(ctx) {
+        const { id, title } = ctx.message.chat;
+        const telegramId = +id;
+        if (!(await Group.count({ where: { telegramId } }))) return ctx.reply("That chat already is registered");
+        await Group.create({ telegramId, name: title });
+        ctx.reply("That chat was registered successfully");
+    }
+
+    /** @param {import('grammy').Context} ctx */
+    async getGroupsList(ctx) {
+        const groups = (await Group.findAll({ attributes: ["name", "id"], raw: true })).map(({ id, name }) => [name, id]);
+        if (!groups.length) return ctx.reply("No one group was registered");
+        const buttonRow = groups.map(([label, data]) => InlineKeyboard.text(label, data));
+        const keyboard = InlineKeyboard.from([buttonRow]);
+        await ctx.reply("Choose group:", { reply_markup: keyboard });
+    }
+
+    async deleteGroup(ctx) {
+        await ctx.answerCallbackQuery({
+            text: "You were curious, indeed!"
+        });
+    }
+
+    /** @param {import('grammy').Context} ctx */
     async addSchedule(ctx) {
         console.log("-----------------------");
         console.log(ctx);
@@ -51,6 +101,7 @@ class Controller {
         ctx.reply("Привет! Пожалуйста, укажите дату и время, когда вы хотите записаться.");
     }
 
+    /** @param {import('grammy').Context} ctx */
     async messageTextHandler(ctx) {
         console.log("-----CONFIG-------------");
         console.log(ctx.session);
@@ -66,6 +117,7 @@ class Controller {
         }
     }
 
+    /** @param {import('grammy').Context} ctx */
     async messageHandler(ctx) {
         if (ctx.session.awaitingMedia) {
             if (ctx.message.photo) {

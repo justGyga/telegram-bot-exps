@@ -3,6 +3,7 @@ import { App } from "./core/app.js";
 import { Scheduler } from "./core/cron.js";
 import { DatabaseAdapter } from "./core/databases/postgres-adapter.js";
 import { BotRouting } from "./core/telegram.js";
+import { groupPlotter } from "./modules/_models/group.js";
 import { userPlotter } from "./modules/_models/user.js";
 import { BOT_COMMANDS } from "./modules/bot/commands.js";
 import composer from "./modules/bot/router.js";
@@ -19,7 +20,7 @@ new App(ApiToken, [
             query: { raw: true, nest: true },
             sync: { alter: true }
         })
-    ).registerModels([userPlotter]),
+    ).registerModels([userPlotter, groupPlotter]),
     new Scheduler([]),
     new BotRouting([composer], BOT_COMMANDS)
 ])
